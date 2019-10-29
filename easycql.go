@@ -1,0 +1,3 @@
+package easycql
+
+func EasyCQL() {}

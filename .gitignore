@@ -1,0 +1,7 @@
+.root
+*_easycql.go
+*.iml
+.idea
+*.swp
+/bin
+/bench-*.txt
