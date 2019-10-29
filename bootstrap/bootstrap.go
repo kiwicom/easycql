@@ -14,9 +14,12 @@ import (
 	"sort"
 )
 
-const genPackage = "github.com/kiwicom/easycql/gen"
-const pkgMarshal = "github.com/kiwicom/easycql/marshal"
-const pkgGocql = "github.com/gocql/gocql"
+// package paths to use in generated files.
+const (
+	genPackage = "github.com/kiwicom/easycql/gen"
+	pkgMarshal = "github.com/kiwicom/easycql/marshal"
+	pkgGocql   = "github.com/gocql/gocql"
+)
 
 type Generator struct {
 	PkgPath, PkgName string

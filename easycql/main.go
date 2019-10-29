@@ -16,17 +16,20 @@ import (
 	"github.com/kiwicom/easycql/parser"
 )
 
-var buildTags = flag.String("build_tags", "", "build tags to add to generated file")
-var snakeCase = flag.Bool("snake_case", false, "use snake_case names instead of CamelCase by default")
-var lowerCamelCase = flag.Bool("lower_camel_case", false, "use lowerCamelCase names instead of CamelCase by default")
-var allStructs = flag.Bool("all", false, "generate marshaler/unmarshalers for all structs in a file")
-var leaveTemps = flag.Bool("leave_temps", false, "do not delete temporary files")
-var stubs = flag.Bool("stubs", false, "only generate stubs for marshaler/unmarshaler funcs")
-var noformat = flag.Bool("noformat", false, "do not run 'gofmt -w' on output file")
-var specifiedName = flag.String("output_filename", "", "specify the filename of the output")
-var processPkg = flag.Bool("pkg", false, "process the whole package instead of just the given file")
-var disallowUnknownFields = flag.Bool("disallow_unknown_fields", false, "return error if any unknown field in json appeared")
-var conservative = flag.Bool("conservative", false, "be conservative about generated code, mostly falls back to gocql")
+// available cli parameters
+var (
+	buildTags             = flag.String("build_tags", "", "build tags to add to generated file")
+	snakeCase             = flag.Bool("snake_case", false, "use snake_case names instead of CamelCase by default")
+	lowerCamelCase        = flag.Bool("lower_camel_case", false, "use lowerCamelCase names instead of CamelCase by default")
+	allStructs            = flag.Bool("all", false, "generate marshaler/unmarshalers for all structs in a file")
+	leaveTemps            = flag.Bool("leave_temps", false, "do not delete temporary files")
+	stubs                 = flag.Bool("stubs", false, "only generate stubs for marshaler/unmarshaler funcs")
+	noformat              = flag.Bool("noformat", false, "do not run 'gofmt -w' on output file")
+	specifiedName         = flag.String("output_filename", "", "specify the filename of the output")
+	processPkg            = flag.Bool("pkg", false, "process the whole package instead of just the given file")
+	disallowUnknownFields = flag.Bool("disallow_unknown_fields", false, "return error if any unknown field in json appeared")
+	conservative          = flag.Bool("conservative", false, "be conservative about generated code, mostly falls back to gocql")
+)
 
 func generate(fname string) (err error) {
 	fInfo, err := os.Stat(fname)
