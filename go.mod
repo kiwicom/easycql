@@ -9,6 +9,3 @@ require (
 	github.com/mailru/easyjson v0.7.0
 	github.com/stretchr/testify v1.3.0
 )
-
-//replace github.com/gocql/gocql => github.com/kiwicom/gocql v0.0.0-20190920161558-af217b7dd1b8
-replace github.com/gocql/gocql => /home/martin/Projects/gocql
