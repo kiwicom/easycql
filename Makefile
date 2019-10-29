@@ -22,8 +22,6 @@ test: generate
 	go test \
 		./tests \
 		./gen
-	#cd benchmark && go test -benchmem -tags use_easycql -bench .
-	#golint -set_exit_status ./tests/*_easycql.go
 
 bench: build
 	./bench.sh
