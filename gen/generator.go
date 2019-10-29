@@ -13,10 +13,13 @@ import (
 	"unicode"
 )
 
-const pkgMarshal = "github.com/kiwicom/easycql/marshal"
-const pkgEasyCQL = "github.com/kiwicom/easycql"
-const pkgGoCQL = "github.com/gocql/gocql"
-const pkgInf = "gopkg.in/inf.v0"
+// package paths to use in imports of the generate files.
+const (
+	pkgMarshal = "github.com/kiwicom/easycql/marshal"
+	pkgEasyCQL = "github.com/kiwicom/easycql"
+	pkgGoCQL   = "github.com/gocql/gocql"
+	pkgInf     = "gopkg.in/inf.v0"
+)
 
 // FieldNamer defines a policy for generating names for struct fields.
 type FieldNamer interface {
