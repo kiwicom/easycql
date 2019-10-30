@@ -389,7 +389,7 @@ type MapStringString map[string]string
 
 var mapStringStringValue = MapStringString{"a": "b"}
 
-//nolint:staticcheck
+//nolint:staticcheck // staticcheck complains about unknown json option `required` but we use it for testing
 type RequiredOptionalStruct struct {
 	FirstName string `json:"first_name,required"`
 	Lastname  string `json:"last_name"`

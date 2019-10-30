@@ -163,7 +163,8 @@ func (g *Generator) Run() error {
 		defer os.Remove(f.Name()) // will not remove after rename
 	}
 
-	//nolint:gosec
+	//nolint:gosec // gosec is complaining about using function call without checking as parameter
+	// but in our case we control the path so the call is safe
 	cmd := exec.Command("go", "run", "-tags", g.BuildTags, filepath.Base(path))
 	cmd.Stdout = f
 	cmd.Stderr = os.Stderr
@@ -175,7 +176,8 @@ func (g *Generator) Run() error {
 	f.Close()
 
 	if !g.NoFormat {
-		//nolint:gosec
+		//nolint:gosec // gosec is complaining about using function call without checking as parameter
+		// but in our case we control the path so the call is safe
 		cmd = exec.Command("gofmt", "-w", f.Name())
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout
