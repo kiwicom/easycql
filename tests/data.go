@@ -124,7 +124,7 @@ var namedPrimitiveTypesValue = NamedPrimitiveTypes{
 type SubStruct struct {
 	Value     string
 	Value2    string
-	unexpored bool
+	unexpored bool //nolint:structcheck // unused field for testing
 }
 
 type SubP struct {
@@ -165,7 +165,7 @@ type Structs struct {
 
 	Slice []string
 
-	unexported bool
+	unexported bool //nolint:structcheck // unused field for testing
 }
 
 var structsValue = Structs{
@@ -229,6 +229,7 @@ type StdMarshaler struct {
 }
 
 var stdMarshalerValue = StdMarshaler{
+	//nolint:gocritic // octalLiteral didn't like the leading zeroes but here they actually help with readability
 	T:  time.Date(2016, 01, 02, 14, 15, 10, 0, time.UTC),
 	IP: net.IPv4(192, 168, 0, 1),
 }
@@ -326,7 +327,7 @@ type DeepNest struct {
 
 var deepNestValue = DeepNest{
 	SliceMap: map[Str][]Str{
-		"testSliceMap": []Str{
+		"testSliceMap": {
 			"0",
 			"1",
 		},
@@ -335,39 +336,39 @@ var deepNestValue = DeepNest{
 		"testSliceMap1": []Str(nil),
 	},
 	SliceMap2: map[Str][]Str{
-		"testSliceMap2": []Str{},
+		"testSliceMap2": {},
 	},
 	NamedSliceMap: map[Str]NamedSlice{
-		"testNamedSliceMap": NamedSlice{
+		"testNamedSliceMap": {
 			"2",
 			"3",
 		},
 	},
 	NamedMapMap: map[Str]NamedMap{
-		"testNamedMapMap": NamedMap{
+		"testNamedMapMap": {
 			"key1": "value1",
 		},
 	},
 	MapSlice: []map[Str]Str{
-		map[Str]Str{
+		{
 			"testMapSlice": "someValue",
 		},
 	},
 	NamedSliceSlice: []NamedSlice{
-		NamedSlice{
+		{
 			"someValue1",
 			"someValue2",
 		},
-		NamedSlice{
+		{
 			"someValue3",
 			"someValue4",
 		},
 	},
 	NamedMapSlice: []NamedMap{
-		NamedMap{
+		{
 			"key2": "value2",
 		},
-		NamedMap{
+		{
 			"key3": "value3",
 		},
 	},
@@ -388,6 +389,7 @@ type MapStringString map[string]string
 
 var mapStringStringValue = MapStringString{"a": "b"}
 
+//nolint:staticcheck
 type RequiredOptionalStruct struct {
 	FirstName string `json:"first_name,required"`
 	Lastname  string `json:"last_name"`

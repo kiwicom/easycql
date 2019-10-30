@@ -157,15 +157,14 @@ func getPkgPathFromGOPATH(fname string, isDir bool) (string, error) {
 		if rel := strings.TrimPrefix(fname, prefix); rel != fname {
 			if !isDir {
 				return path.Dir(filePathToPackagePath(rel)), nil
-			} else {
-				return path.Clean(filePathToPackagePath(rel)), nil
 			}
+			return path.Clean(filePathToPackagePath(rel)), nil
 		}
 	}
 
 	return "", fmt.Errorf("file '%v' is not in GOPATH", fname)
 }
 
-func filePathToPackagePath(path string) string {
-	return filepath.ToSlash(path)
+func filePathToPackagePath(pth string) string {
+	return filepath.ToSlash(pth)
 }

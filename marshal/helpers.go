@@ -4,7 +4,7 @@
 
 package marshal
 
-func AppendBytes(p []byte, d []byte) []byte {
+func AppendBytes(p, d []byte) []byte {
 	if d == nil {
 		return appendInt(p, -1)
 	}

@@ -23,6 +23,7 @@ type fieldTags struct {
 }
 
 // parseFieldTags parses the json field tag into a structure.
+//nolint:gocritic // parameter f is huge
 func parseFieldTags(f reflect.StructField) (fieldTags, error) {
 	var ret fieldTags
 
@@ -87,7 +88,7 @@ func (g *Generator) genTypeEncoder(t reflect.Type, in string, tags fieldTags, in
 }
 
 // genTypeEncoderNoCheck generates code that encodes in of type t into the writer.
-func (g *Generator) genTypeEncoderNoCheck(t reflect.Type, in string, tags fieldTags, indent int, assumeNonEmpty bool) error {
+func (g *Generator) genTypeEncoderNoCheck(_ reflect.Type, in string, _ fieldTags, indent int, _ bool) error {
 	ws := strings.Repeat("  ", indent)
 
 	fallbackErr := g.uniqueVarName()
@@ -101,29 +102,8 @@ func (g *Generator) genTypeEncoderNoCheck(t reflect.Type, in string, tags fieldT
 	return nil
 }
 
-func (g *Generator) notEmptyCheck(t reflect.Type, v string) string {
-	switch t.Kind() {
-	case reflect.Slice, reflect.Map:
-		return "len(" + v + ") != 0"
-	case reflect.Interface, reflect.Ptr:
-		return v + " != nil"
-	case reflect.Bool:
-		return v
-	case reflect.String:
-		return v + ` != ""`
-	case reflect.Float32, reflect.Float64,
-		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-
-		return v + " != 0"
-
-	default:
-		// note: Array types don't have a useful empty value
-		return "true"
-	}
-}
-
-func (g *Generator) genStructFieldEncoder(t reflect.Type, f reflect.StructField, first, firstCondition bool) (bool, error) {
+//nolint:gocritic // parameter f is huge
+func (g *Generator) genStructFieldEncoder(t reflect.Type, f reflect.StructField, _, firstCondition bool) (bool, error) {
 	cqlName := g.fieldNamer.GetCQLFieldName(t, f)
 	tags, err := parseFieldTags(f)
 	if err != nil {
@@ -219,6 +199,7 @@ func (g *Generator) genStructEncoder(t reflect.Type) error {
 	return nil
 }
 
+//nolint:dupl // this function is very similar to genStructUnmarshaler but does the opposite
 func (g *Generator) genStructMarshaler(t reflect.Type) error {
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Map, reflect.Struct:

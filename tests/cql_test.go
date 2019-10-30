@@ -2448,7 +2448,6 @@ func TestUnmarshalInteger(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, test.Value, value.Elem().Interface())
 			}
-
 		})
 	}
 }
@@ -2700,7 +2699,7 @@ func extractBigInt(iface interface{}) *big.Int {
 	}
 }
 
-func requireBigIntStructEqual(t *testing.T, expectedIface interface{}, actualIface interface{}) {
+func requireBigIntStructEqual(t *testing.T, expectedIface, actualIface interface{}) {
 	t.Helper()
 	expected := extractBigInt(expectedIface)
 	actual := extractBigInt(actualIface)
@@ -2875,7 +2874,6 @@ func TestUnmarshalBoolean(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, test.Value, value.Elem().Interface())
 			}
-
 		})
 	}
 }
@@ -3066,7 +3064,7 @@ func extractDec(iface interface{}) *inf.Dec {
 	}
 }
 
-func requireDecStructEqual(t *testing.T, expectedIface interface{}, actualIface interface{}) {
+func requireDecStructEqual(t *testing.T, expectedIface, actualIface interface{}) {
 	t.Helper()
 	expected := extractDec(expectedIface)
 	actual := extractDec(actualIface)
@@ -3217,7 +3215,6 @@ func TestUnmarshalFloat(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, test.Value, value.Elem().Interface())
 			}
-
 		})
 	}
 }
@@ -3344,7 +3341,6 @@ func TestUnmarshalDouble(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, test.Value, value.Elem().Interface())
 			}
-
 		})
 	}
 }

@@ -12,9 +12,6 @@ import (
 	"gopkg.in/inf.v0"
 )
 
-// Target this byte size for initial slice allocation to reduce garbage collection.
-const minSliceBytes = 64
-
 func (g *Generator) getDecoderName(t reflect.Type) string {
 	return g.functionName("decode", t)
 }
@@ -269,9 +266,6 @@ var gocqlIntTypes = map[gocql.Type]gocqlIntType{
 	},
 }
 
-// TODO:
-// - case *[]byte
-
 func varcharToStringDecoder(g *Generator, t reflect.Type, info, in, out string, tags fieldTags, indent int) error {
 	ws := strings.Repeat("  ", indent)
 	fmt.Fprintln(g.out, ws+out+" = "+g.getType(t)+"("+in+")")
@@ -327,7 +321,7 @@ func intLikeToIntDecoder(gocqlType gocql.Type) decoderGen {
 			}
 			if gocqlTypeMeta.goType.Bits() < t.Bits() {
 				fmt.Fprintf(g.out, "%s%s = %s(%s) & 0x%x\n",
-					ws, out, g.getType(t), nativeVal, (uint64(1)<<gocqlTypeMeta.goType.Bits())-1)
+					ws, out, g.getType(t), nativeVal, (uint64(1)<<uint(gocqlTypeMeta.goType.Bits()))-1)
 			} else {
 				fmt.Fprintf(g.out, "%s%s = %s(%s)\n",
 					ws, out, g.getType(t), nativeVal)
@@ -343,7 +337,7 @@ func intLikeToIntDecoder(gocqlType gocql.Type) decoderGen {
 			}
 			if gocqlTypeMeta.goType.Bits() < 32 {
 				fmt.Fprintf(g.out, "%s%s = %s(%s) & 0x%x\n",
-					ws, out, g.getType(t), nativeVal, (uint64(1)<<gocqlTypeMeta.goType.Bits())-1)
+					ws, out, g.getType(t), nativeVal, (uint64(1)<<uint(gocqlTypeMeta.goType.Bits()))-1)
 			} else {
 				fmt.Fprintf(g.out, "%s%s = %s(%s) & 0xffffffff\n",
 					ws, out, g.getType(t), nativeVal)
@@ -369,7 +363,7 @@ func varIntToStringDecoder(g *Generator, t reflect.Type, info, in, out string, t
 	return nil
 }
 
-func uuidDecoder(g *Generator, in, out string, indent int) error {
+func uuidDecoder(g *Generator, in, out string, indent int) {
 	ws := strings.Repeat("  ", indent)
 	err := g.uniqueVarName()
 	fmt.Fprintf(g.out, "%svar %s error\n", ws, err)
@@ -377,7 +371,6 @@ func uuidDecoder(g *Generator, in, out string, indent int) error {
 	fmt.Fprintf(g.out, "%sif %s != nil {\n", ws, err)
 	fmt.Fprintf(g.out, "%s    return fmt.Errorf(\"unable to parse UUID: %%s\", %s)\n", ws, err)
 	fmt.Fprintf(g.out, "%s}\n", ws)
-	return nil
 }
 
 func uuidToStringDecoder(g *Generator, t reflect.Type, info, in, out string, tags fieldTags, indent int) error {
@@ -473,10 +466,6 @@ func doubleToFloat64Decoder(g *Generator, t reflect.Type, info, in, out string, 
 	ws := strings.Repeat("  ", indent)
 	fmt.Fprintf(g.out, "%s%s = %s(math.Float64frombits(uint64(marshal.DecBigInt(%s))))\n",
 		ws, out, g.getType(t), in)
-	return nil
-}
-
-func genTODO(g *Generator, t reflect.Type, out string, tags fieldTags, indent int) error {
 	return nil
 }
 
@@ -576,8 +565,7 @@ func (g *Generator) genTypeDecoderNoCheck(t reflect.Type, info, in, out string, 
 		return g.genCQLTypeSwitch(t, info, in, out, tags, indent, decoderMeta)
 	}
 
-	switch t.Kind() {
-	case reflect.Ptr:
+	if t.Kind() == reflect.Ptr {
 		fmt.Fprintln(g.out, ws+"if "+in+" == nil {")
 		fmt.Fprintln(g.out, ws+"  "+out+" = nil")
 		fmt.Fprintln(g.out, ws+"} else {")
@@ -602,11 +590,11 @@ func reference(out string) string {
 	if len(out) > 0 && out[0] == '*' {
 		// NOTE: In order to remove an extra reference to a pointer
 		return out[1:]
-	} else {
-		return "&" + out
 	}
+	return "&" + out
 }
 
+//nolint:gocritic // parameter f is huge
 func (g *Generator) genStructFieldDecoder(t reflect.Type, f reflect.StructField) error {
 	cqlName := g.fieldNamer.GetCQLFieldName(t, f)
 	tags, err := parseFieldTags(f)
@@ -630,7 +618,8 @@ func (g *Generator) genStructFieldDecoder(t reflect.Type, f reflect.StructField)
 	return nil
 }
 
-func (g *Generator) genRequiredFieldSet(t reflect.Type, f reflect.StructField) error {
+//nolint:gocritic // parameter f is huge
+func (g *Generator) genRequiredFieldSet(_ reflect.Type, f reflect.StructField) error {
 	tags, err := parseFieldTags(f)
 	if err != nil {
 		return err
@@ -644,6 +633,7 @@ func (g *Generator) genRequiredFieldSet(t reflect.Type, f reflect.StructField) e
 	return nil
 }
 
+//nolint:gocritic // parameter f is huge
 func (g *Generator) genRequiredFieldCheck(t reflect.Type, f reflect.StructField) error {
 	cqlName := g.fieldNamer.GetCQLFieldName(t, f)
 	tags, err := parseFieldTags(f)
@@ -828,6 +818,7 @@ func (g *Generator) genStructDecoder(t reflect.Type) error {
 	return nil
 }
 
+//nolint:dupl // this function is very similar to genStructMarshaler but does the opposite
 func (g *Generator) genStructUnmarshaler(t reflect.Type) error {
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Map, reflect.Struct:
