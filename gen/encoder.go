@@ -82,18 +82,18 @@ func isCQLTypeName(s string) bool {
 }
 
 // genTypeEncoder generates code that encodes in of type t into the writer, but uses marshaler interface if implemented by t.
-func (g *Generator) genTypeEncoder(t reflect.Type, in string, tags fieldTags, indent int, assumeNonEmpty bool) error {
-	err := g.genTypeEncoderNoCheck(t, in, tags, indent, assumeNonEmpty)
+func (g *Generator) genTypeEncoder(t reflect.Type, info, in string, tags fieldTags, indent int, assumeNonEmpty bool) error {
+	err := g.genTypeEncoderNoCheck(t, info, in, tags, indent, assumeNonEmpty)
 	return err
 }
 
 // genTypeEncoderNoCheck generates code that encodes in of type t into the writer.
-func (g *Generator) genTypeEncoderNoCheck(_ reflect.Type, in string, _ fieldTags, indent int, _ bool) error {
+func (g *Generator) genTypeEncoderNoCheck(_ reflect.Type, info, in string, _ fieldTags, indent int, _ bool) error {
 	ws := strings.Repeat("  ", indent)
 
 	fallbackErr := g.uniqueVarName()
 	marshaledBytes := g.uniqueVarName()
-	fmt.Fprintln(g.out, ws+marshaledBytes+", "+fallbackErr+" := gocql.Marshal(info, "+in+")")
+	fmt.Fprintln(g.out, ws+marshaledBytes+", "+fallbackErr+" := gocql.Marshal("+info+", "+in+")")
 	fmt.Fprintln(g.out, ws+"if "+fallbackErr+" != nil {")
 	fmt.Fprintln(g.out, ws+"  return nil, "+fallbackErr)
 	fmt.Fprintln(g.out, ws+"}")
@@ -117,7 +117,7 @@ func (g *Generator) genStructFieldEncoder(t reflect.Type, f reflect.StructField,
 	toggleFirstCondition := firstCondition
 
 	fmt.Fprintf(g.out, "    case %q:\n", cqlName)
-	if err := g.genTypeEncoder(f.Type, "in."+f.Name, tags, 2, false); err != nil {
+	if err := g.genTypeEncoder(f.Type, "udtElement.Type", "in."+f.Name, tags, 2, false); err != nil {
 		return toggleFirstCondition, err
 	}
 	return toggleFirstCondition, nil
@@ -144,7 +144,7 @@ func (g *Generator) genSliceArrayMapEncoder(t reflect.Type) error {
 
 	fmt.Fprintln(g.out, "func "+fname+"(info gocql.TypeInfo, in "+typ+") ([]byte, error) {")
 	fmt.Fprintln(g.out, "var buf []byte")
-	err := g.genTypeEncoderNoCheck(t, "in", fieldTags{}, 1, false)
+	err := g.genTypeEncoderNoCheck(t, "info", "in", fieldTags{}, 1, false)
 	if err != nil {
 		return err
 	}
