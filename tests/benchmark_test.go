@@ -1,9 +1,11 @@
 package tests
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/gocql/gocql"
+	"gopkg.in/inf.v0"
 
 	"github.com/kiwicom/easycql/marshal"
 )
@@ -136,26 +138,36 @@ func BenchmarkUnmarshal(b *testing.B) {
 	}
 
 	fieldValues := [][]byte{
-		[]byte("\x12\x34\x56\x78"),
-		[]byte("\x12"),
-		[]byte("\x12\x34"),
-		[]byte("\x12\x34\x56\x78"),
-		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef"),
-		[]byte("\x01"),
-		[]byte("hello world"),
-		[]byte("\x00\x00\x00\x00"),
-		[]byte("\x00\x00\x00\x00\x00\x00\x00\x00"),
-		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef\x12\x34\x56\x78\x9a"),
-		[]byte("\x00\x00\x00\x01\xde\xef\x12\x34\x56\x78\x9a"),
-		[]byte("\x12\x34\x56\x78"),
-		[]byte("\x12"),
-		[]byte("\x12\x34"),
-		[]byte("\x12\x34\x56\x78"),
-		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef"),
-		[]byte("\x01"),
-		[]byte("hello world"),
-		[]byte("\x00\x00\x00\x00"),
-		[]byte("\x00\x00\x00\x00\x00\x00\x00\x00"),
+		[]byte("\x12\x34\x56\x78"),                 // int
+		[]byte("\x12"),                             // int8
+		[]byte("\x12\x34"),                         // int16
+		[]byte("\x12\x34\x56\x78"),                 // int32
+		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef"), // int64
+		[]byte("\x12\x34\x56\x78"),                 // uint
+		[]byte("\x12"),                             // uint8
+		[]byte("\x12\x34"),                         // uint16
+		[]byte("\x12\x34\x56\x78"),                 // uint32
+		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef"), // uint64
+		[]byte("\x01"),                             // bool
+		[]byte("hello world"),                      // string
+		[]byte("\x00\x00\x00\x00"),                 // float32
+		[]byte("\x00\x00\x00\x00\x00\x00\x00\x00"), // float64
+		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef\x12\x34\x56\x78\x9a"), // BigInt
+		[]byte("\x00\x00\x00\x01\xde\xef\x12\x34\x56\x78\x9a"),         // Dec
+		[]byte("\x12\x34\x56\x78"),                                     // NamedInt
+		[]byte("\x12"),                                                 // NamedInt8
+		[]byte("\x12\x34"),                                             // NamedInt16
+		[]byte("\x12\x34\x56\x78"),                                     // NamedInt32
+		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef"),                     // NamedInt64
+		[]byte("\x12\x34\x56\x78"),                                     // NamedUint
+		[]byte("\x12"),                                                 // NamedUint8
+		[]byte("\x12\x34"),                                             // NamedUint16
+		[]byte("\x12\x34\x56\x78"),                                     // NamedUint32
+		[]byte("\x12\x34\x56\x78\x9a\xbc\xde\xef"),                     // NamedUint64
+		[]byte("\x01"),                                                 // NamedBool
+		[]byte("hello world"),                                          // NamedString
+		[]byte("\x00\x00\x00\x00"),                                     // NamedFloat32
+		[]byte("\x00\x00\x00\x00\x00\x00\x00\x00"),                     // NamedFloat64
 	}
 
 	var data []byte
