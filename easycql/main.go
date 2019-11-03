@@ -39,18 +39,18 @@ func generate(fname string) (err error) {
 
 	p := parser.Parser{AllStructs: *allStructs}
 	if err := p.Parse(fname, fInfo.IsDir()); err != nil {
-		return fmt.Errorf("Error parsing %v: %v", fname, err)
+		return fmt.Errorf("error parsing %v: %v", fname, err)
 	}
 
 	var outName string
 	if fInfo.IsDir() {
 		outName = filepath.Join(fname, p.PkgName+"_easycql.go")
 	} else {
-		if s := strings.TrimSuffix(fname, ".go"); s == fname {
-			return errors.New("Filename must end in '.go'")
-		} else {
-			outName = s + "_easycql.go"
+		s := strings.TrimSuffix(fname, ".go")
+		if s == fname {
+			return errors.New("filename must end in '.go'")
 		}
+		outName = s + "_easycql.go"
 	}
 
 	if *specifiedName != "" {
@@ -78,7 +78,7 @@ func generate(fname string) (err error) {
 	}
 
 	if err := g.Run(); err != nil {
-		return fmt.Errorf("Bootstrap failed: %v", err)
+		return fmt.Errorf("bootstrap failed: %v", err)
 	}
 	return nil
 }

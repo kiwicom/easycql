@@ -86,7 +86,6 @@ func DecBigInt2C(data []byte, n *big.Int) {
 }
 
 func ReadBytes(p []byte) ([]byte, []byte) {
-	// TODO: really should use a framer
 	size := readInt(p)
 	p = p[4:]
 	if size < 0 {

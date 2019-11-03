@@ -83,5 +83,4 @@ func TestFixVendorPath(t *testing.T) {
 			t.Errorf("[%d] fixPkgPathVendoring(%s) = %s; want %s", i, test.In, got, test.Out)
 		}
 	}
-
 }

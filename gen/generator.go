@@ -20,6 +20,70 @@ const (
 	pkgGoCQL   = "github.com/gocql/gocql"
 	pkgInf     = "gopkg.in/inf.v0"
 )
+const license = `
+// ---------------------------------------------------------------------------------------------------------------------
+// OPEN SOURCE ATTRIBUTION
+// ---------------------------------------------------------------------------------------------------------------------
+//
+// This generated file uses portions of the code from easyjson (https://github.com/mailru/easyjson/) and
+// gocql (https://github.com/gocql/gocql) projects which are licensed under the MIT and
+// BSD 3-Clause licenses respectively.
+//
+// --------------- MIT License -----------------------------------------------------------------------------------------
+//
+// >>> easyjson
+//
+// Copyright (c) 2016 Mail.Ru Group
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+// documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions
+// of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+// OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+// --------------- BSD 3-clause License -------------------------------------------------------------------------------
+//
+// >>> gocql
+//
+// Copyright (c) 2016, The Gocql authors
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ---------------------------------------------------------------------------------------------------------------------
+
+`
 
 // FieldNamer defines a policy for generating names for struct fields.
 type FieldNamer interface {
@@ -83,16 +147,16 @@ func NewGenerator(filename string) *Generator {
 	// Use a file-unique prefix on all auxiliary funcs to avoid
 	// name clashes.
 	hash := fnv.New32()
-	hash.Write([]byte(filename))
+	_, _ = hash.Write([]byte(filename))
 	ret.hashString = fmt.Sprintf("%x", hash.Sum32())
 
 	return ret
 }
 
 // SetPkg sets the name and path of output package.
-func (g *Generator) SetPkg(name, path string) {
+func (g *Generator) SetPkg(name, pth string) {
 	g.pkgName = name
-	g.pkgPath = path
+	g.pkgPath = pth
 }
 
 // SetBuildTags sets build tags for the output file.
@@ -161,70 +225,7 @@ func (g *Generator) printHeader() {
 	fmt.Println("package ", g.pkgName)
 	fmt.Println()
 
-	fmt.Print(`
-// ---------------------------------------------------------------------------------------------------------------------
-// OPEN SOURCE ATTRIBUTION
-// ---------------------------------------------------------------------------------------------------------------------
-//
-// This generated file uses portions of the code from easyjson (https://github.com/mailru/easyjson/) and
-// gocql (https://github.com/gocql/gocql) projects which are licensed under the MIT and
-// BSD 3-Clause licenses respectively.
-//
-// --------------- MIT License -----------------------------------------------------------------------------------------
-//
-// >>> easyjson
-//
-// Copyright (c) 2016 Mail.Ru Group
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-// documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-// the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or substantial portions
-// of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
-// OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-// --------------- BSD 3-clause License -------------------------------------------------------------------------------
-//
-// >>> gocql
-//
-// Copyright (c) 2016, The Gocql authors
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// * Redistributions of source code must retain the above copyright notice, this
-//   list of conditions and the following disclaimer.
-//
-// * Redistributions in binary form must reproduce the above copyright notice,
-//   this list of conditions and the following disclaimer in the documentation
-//   and/or other materials provided with the distribution.
-//
-// * Neither the name of the copyright holder nor the names of its
-//   contributors may be used to endorse or promote products derived from
-//   this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// ---------------------------------------------------------------------------------------------------------------------
-
-`)
+	fmt.Print(license)
 
 	byAlias := make(map[string]string, len(g.imports))
 	aliases := make([]string, 0, len(g.imports))
@@ -300,12 +301,8 @@ func fixPkgPathVendoring(pkgPath string) string {
 }
 
 func fixAliasName(alias string) string {
-	alias = strings.Replace(
-		strings.Replace(alias, ".", "_", -1),
-		"-",
-		"_",
-		-1,
-	)
+	alias = strings.ReplaceAll(alias, ".", "_")
+	alias = strings.ReplaceAll(alias, "-", "_")
 
 	if alias[0] == 'v' { // to void conflicting with var names, say v1
 		alias = "_" + alias
@@ -460,6 +457,7 @@ func (g *Generator) functionName(prefix string, t reflect.Type) string {
 // DefaultFieldsNamer implements trivial naming policy equivalent to encoding/json.
 type DefaultFieldNamer struct{}
 
+//nolint:gocritic // parameter f is huge
 func (DefaultFieldNamer) GetCQLFieldName(t reflect.Type, f reflect.StructField) string {
 	cqlName := strings.Split(f.Tag.Get("easycql"), ",")[0]
 	if cqlName != "" {
@@ -526,6 +524,7 @@ func lowerFirst(s string) string {
 	return str
 }
 
+//nolint:gocritic // parameter f is huge
 func (LowerCamelCaseFieldNamer) GetCQLFieldName(t reflect.Type, f reflect.StructField) string {
 	cqlName := strings.Split(f.Tag.Get("easycql"), ",")[0]
 	if cqlName != "" {
@@ -580,9 +579,10 @@ func camelToSnake(name string) string {
 	if lastUpper != 0 {
 		ret.WriteRune(unicode.ToLower(lastUpper))
 	}
-	return string(ret.Bytes())
+	return ret.String()
 }
 
+//nolint:gocritic // parameter f is huge
 func (SnakeCaseFieldNamer) GetCQLFieldName(t reflect.Type, f reflect.StructField) string {
 	cqlName := strings.Split(f.Tag.Get("easycql"), ",")[0]
 	if cqlName != "" {
