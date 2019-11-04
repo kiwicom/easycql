@@ -122,7 +122,7 @@ We have a benchmark for unmarshaling a large struct with different types that ca
 `make bench`.
 However this is a synthetic benchmark and your mileage may vary depending on the schema of your data.
 
-Conservative mode is roughly 5 times faster than using plain `gocql.Unmarshal` and optimized mode
+When unmarshaling, conservative mode is roughly 4 times faster than using plain `gocql.Unmarshal` and optimized mode
 is roughly 2 times faster than conservative mode according to our benchmark:
 
 ```
@@ -130,37 +130,43 @@ is roughly 2 times faster than conservative mode according to our benchmark:
 goos: linux
 goarch: amd64
 pkg: github.com/kiwicom/easycql/tests
-BenchmarkUnmarshal-8      234490              5108 ns/op
+BenchmarkUnmarshal-8      191496              6343 ns/op
+BenchmarkMarshal-8        202076              5839 ns/op
 PASS
-ok      github.com/kiwicom/easycql/tests        2.159s
+ok      github.com/kiwicom/easycql/tests        3.517s
 
 ---- easycql conservative ----
 goos: linux
 goarch: amd64
 pkg: github.com/kiwicom/easycql/tests
-BenchmarkUnmarshal-8     1178143               989 ns/op
+BenchmarkUnmarshal-8      809300              1474 ns/op
+BenchmarkMarshal-8        413431              2702 ns/op
 PASS
-ok      github.com/kiwicom/easycql/tests        1.931s
+ok      github.com/kiwicom/easycql/tests        3.303s
 
 ---- easycql optimized ----
 goos: linux
 goarch: amd64
 pkg: github.com/kiwicom/easycql/tests
-BenchmarkUnmarshal-8     2684508               441 ns/op
+BenchmarkUnmarshal-8     1915501               616 ns/op
+BenchmarkMarshal-8        419199              2741 ns/op
 PASS
-ok      github.com/kiwicom/easycql/tests        1.648s
+ok      github.com/kiwicom/easycql/tests        3.006s
 
 ---- comparison ----
 
 plain gocql vs easycql conservative:
 benchmark                old ns/op     new ns/op     delta
-BenchmarkUnmarshal-8     5108          989           -80.64%
+BenchmarkUnmarshal-8     6343          1474          -76.76%
+BenchmarkMarshal-8       5839          2702          -53.72%
 
 plain gocql vs easycql optimized:
 benchmark                old ns/op     new ns/op     delta
-BenchmarkUnmarshal-8     5108          441           -91.37%
+BenchmarkUnmarshal-8     6343          616           -90.29%
+BenchmarkMarshal-8       5839          2741          -53.06%
 
 easycql conservative vs easycql optimized:
 benchmark                old ns/op     new ns/op     delta
-BenchmarkUnmarshal-8     989           441           -55.41%
+BenchmarkUnmarshal-8     1474          616           -58.21%
+BenchmarkMarshal-8       2702          2741          +1.44%
 ```
