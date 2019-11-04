@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/big"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/gocql/gocql"
@@ -19,6 +20,7 @@ var varcharTests = []struct {
 	FieldTypeInfo gocql.TypeInfo
 	Data          []byte
 	Values        CQLVarcharTypes
+	NullCheck     bool
 }{
 	{
 		Name:          "varchar value",
@@ -53,6 +55,7 @@ var varcharTests = []struct {
 			CustomString:    CustomString(""),
 			CustomStringPtr: nil,
 		},
+		NullCheck: true,
 	},
 	{
 		Name:          "ascii value",
@@ -87,6 +90,7 @@ var varcharTests = []struct {
 			CustomString:    CustomString(""),
 			CustomStringPtr: nil,
 		},
+		NullCheck: true,
 	},
 	{
 		Name:          "text value",
@@ -121,6 +125,7 @@ var varcharTests = []struct {
 			CustomString:    CustomString(""),
 			CustomStringPtr: nil,
 		},
+		NullCheck: true,
 	},
 	{
 		Name:          "blob value",
@@ -155,10 +160,11 @@ var varcharTests = []struct {
 			CustomString:    CustomString(""),
 			CustomStringPtr: nil,
 		},
+		NullCheck: true,
 	},
 }
 
-func buildUDT(typ reflect.Type, fieldType gocql.TypeInfo, fieldData []byte) (gocql.UDTTypeInfo, []byte) {
+func buildUDT(typ reflect.Type, fieldType gocql.TypeInfo, fieldData []byte, nullCheck bool) (gocql.UDTTypeInfo, []byte) {
 	var data []byte
 	typeInfo := gocql.UDTTypeInfo{
 		NativeType: gocql.NewNativeType(3, gocql.TypeUDT, ""),
@@ -172,7 +178,11 @@ func buildUDT(typ reflect.Type, fieldType gocql.TypeInfo, fieldData []byte) (goc
 			Type: fieldType,
 		}
 		typeInfo.Elements = append(typeInfo.Elements, udtField)
-		data = marshal.AppendBytes(data, fieldData)
+		if nullCheck && fieldData == nil && strings.HasSuffix(typ.Field(i).Name, "String") {
+			data = marshal.AppendBytes(data, []byte{})
+		} else {
+			data = marshal.AppendBytes(data, fieldData)
+		}
 	}
 	return typeInfo, data
 }
@@ -181,11 +191,26 @@ func TestUnmarshalVarchar(t *testing.T) {
 	for _, test := range varcharTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			typeInfo, data := buildUDT(reflect.TypeOf((*CQLVarcharTypes)(nil)).Elem(), test.FieldTypeInfo, test.Data)
+			typeInfo, data := buildUDT(reflect.TypeOf((*CQLVarcharTypes)(nil)).Elem(), test.FieldTypeInfo, test.Data,
+				false)
 			var value CQLVarcharTypes
 			err := gocql.Unmarshal(typeInfo, data, &value)
 			require.NoError(t, err)
 			require.Equal(t, test.Values, value)
+		})
+	}
+}
+
+func TestMarshalVarchar(t *testing.T) {
+	for _, test := range varcharTests {
+		test := test
+		t.Run(test.Name, func(t *testing.T) {
+			var data []byte
+			typeInfo, expectedData := buildUDT(reflect.TypeOf((*CQLVarcharTypes)(nil)).Elem(), test.FieldTypeInfo,
+				test.Data, test.NullCheck)
+			data, err := gocql.Marshal(typeInfo, test.Values)
+			require.NoError(t, err)
+			require.Equal(t, expectedData, data)
 		})
 	}
 }
@@ -2439,7 +2464,7 @@ func TestUnmarshalInteger(t *testing.T) {
 	for _, test := range integerTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data)
+			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
 			if test.Error {
@@ -2715,7 +2740,7 @@ func TestUnmarshalBigInt(t *testing.T) {
 	for _, test := range bigIntTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data)
+			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
 			if test.Error {
@@ -2865,7 +2890,7 @@ func TestUnmarshalBoolean(t *testing.T) {
 	for _, test := range booleanTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data)
+			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
 			if test.Error {
@@ -3080,7 +3105,7 @@ func TestUnmarshalDec(t *testing.T) {
 	for _, test := range decimalTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data)
+			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
 			if test.Error {
@@ -3206,7 +3231,7 @@ func TestUnmarshalFloat(t *testing.T) {
 	for _, test := range floatTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data)
+			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
 			if test.Error {
@@ -3332,7 +3357,7 @@ func TestUnmarshalDouble(t *testing.T) {
 	for _, test := range doubleTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data)
+			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
 			if test.Error {
