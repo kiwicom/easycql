@@ -33,9 +33,6 @@ easycql currently has two modes of operation:
 easycql aims for the generated code to be compatible with gocql behavior so that the generated
 code can be seamlessly plugged into existing software projects.
 
-Currently the behavior of unmarshaling into unsigned integer Go types is different than that of
-gocql master, at least until https://github.com/gocql/gocql/pull/1360 is merged.
-
 ## easycql struct tags
 
 easycql supports struct tags on fields to guide it's behavior.
