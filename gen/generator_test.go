@@ -1,7 +1,10 @@
 package gen
 
 import (
+	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestCamelToSnake(t *testing.T) {
@@ -83,4 +86,36 @@ func TestFixVendorPath(t *testing.T) {
 			t.Errorf("[%d] fixPkgPathVendoring(%s) = %s; want %s", i, test.In, got, test.Out)
 		}
 	}
+}
+
+type TestTagsStruct struct {
+	CQLTag     string `cql:"my_cql_tag"`
+	EasyCQLTag string `easycql:"my_easycql_tag"`
+	Both       string `cql:"my_both_cql" easycql:"my_both_easycql"`
+	Fallback   string `cql:"my_fallback" easycql:",ascii"`
+}
+
+func TestUseCQLTag(t *testing.T) {
+	g := NewGenerator("test")
+	g.UseSnakeCase()
+	typ := reflect.TypeOf((*TestTagsStruct)(nil)).Elem()
+	fields, err := getStructFields(typ)
+	require.NoError(t, err)
+
+	expected := map[string]string{
+		"CQLTag":     "my_cql_tag",
+		"EasyCQLTag": "my_easycql_tag",
+		"Both":       "my_both_easycql",
+		"Fallback":   "my_fallback",
+	}
+
+	actual := make(map[string]string)
+	for _, f := range fields {
+		tags, err := parseFieldTags(f)
+		require.NoError(t, err)
+		cqlName := g.getFieldName(typ, f, tags)
+		actual[f.Name] = cqlName
+	}
+
+	require.Equal(t, expected, actual)
 }

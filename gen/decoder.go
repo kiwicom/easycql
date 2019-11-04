@@ -596,7 +596,6 @@ func reference(out string) string {
 
 //nolint:gocritic // parameter f is huge
 func (g *Generator) genStructFieldDecoder(t reflect.Type, f reflect.StructField) error {
-	cqlName := g.fieldNamer.GetCQLFieldName(t, f)
 	tags, err := parseFieldTags(f)
 	if err != nil {
 		return err
@@ -605,6 +604,8 @@ func (g *Generator) genStructFieldDecoder(t reflect.Type, f reflect.StructField)
 	if tags.omit {
 		return nil
 	}
+
+	cqlName := g.getFieldName(t, f, tags)
 
 	fmt.Fprintf(g.out, "    case %q:\n", cqlName)
 	if err := g.genTypeDecoder(f.Type, "udtElement.Type", "elementData", "out."+f.Name, tags, 3); err != nil {
@@ -635,7 +636,6 @@ func (g *Generator) genRequiredFieldSet(_ reflect.Type, f reflect.StructField) e
 
 //nolint:gocritic // parameter f is huge
 func (g *Generator) genRequiredFieldCheck(t reflect.Type, f reflect.StructField) error {
-	cqlName := g.fieldNamer.GetCQLFieldName(t, f)
 	tags, err := parseFieldTags(f)
 	if err != nil {
 		return err
@@ -644,6 +644,8 @@ func (g *Generator) genRequiredFieldCheck(t reflect.Type, f reflect.StructField)
 	if !tags.required {
 		return nil
 	}
+
+	cqlName := g.getFieldName(t, f, tags)
 
 	g.imports["fmt"] = "fmt"
 
