@@ -27,11 +27,13 @@ type fieldTags struct {
 func parseFieldTags(f reflect.StructField) (fieldTags, error) {
 	var ret fieldTags
 
+	ret.name = f.Tag.Get("cql")
+
 	for i, s := range strings.Split(f.Tag.Get("easycql"), ",") {
 		switch {
 		case i == 0 && s == "-":
 			ret.omit = true
-		case i == 0:
+		case i == 0 && s != "":
 			ret.name = s
 		case s == "required":
 			ret.required = true
@@ -104,7 +106,6 @@ func (g *Generator) genTypeEncoderNoCheck(_ reflect.Type, info, in string, _ fie
 
 //nolint:gocritic // parameter f is huge
 func (g *Generator) genStructFieldEncoder(t reflect.Type, f reflect.StructField, _, firstCondition bool) (bool, error) {
-	cqlName := g.fieldNamer.GetCQLFieldName(t, f)
 	tags, err := parseFieldTags(f)
 	if err != nil {
 		return false, err
@@ -113,6 +114,8 @@ func (g *Generator) genStructFieldEncoder(t reflect.Type, f reflect.StructField,
 	if tags.omit {
 		return firstCondition, nil
 	}
+
+	cqlName := g.getFieldName(t, f, tags)
 
 	toggleFirstCondition := firstCondition
 

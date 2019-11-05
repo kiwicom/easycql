@@ -291,6 +291,14 @@ func (g *Generator) Run(out io.Writer) error {
 	return err
 }
 
+//nolint:gocritic // parameter f is huge
+func (g *Generator) getFieldName(t reflect.Type, f reflect.StructField, tags fieldTags) string {
+	if tags.name != "" {
+		return tags.name
+	}
+	return g.fieldNamer.GetCQLFieldName(t, f)
+}
+
 // fixes vendored paths
 func fixPkgPathVendoring(pkgPath string) string {
 	const vendor = "/vendor/"
