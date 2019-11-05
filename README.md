@@ -15,6 +15,22 @@ easycql -all <file>.go
 
 This will generate marshaler and unmarshaler implementations for all structs in the given file.
 
+If you want to generate code for some types only, you can annotate the types with `easycql:cql` on a separate
+line of the comment:
+
+```go
+// MyStruct will have the code generated.
+// easycql:cql
+type MyStruct struct {
+    Value int
+}
+
+// AnotherStruct won't have the code generated (unless you use -all)
+type AnotherStruct struct {
+    Value string
+}
+``` 
+
 Please note that easycql requires a full Go build environment and the GOPATH environment variable
 to be set. This is because easyjson code generation invokes go run on a temporary file
 (an approach to code generation borrowed from easyjson, which borrowed it from ffjson).
