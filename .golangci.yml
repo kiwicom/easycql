@@ -39,24 +39,50 @@ linters-settings:
 linters:
   enable-all: true
   disable:
-    # prealloc is not recommended by `golangci-lint` developers.
+    #  Finds slice declarations that could potentially be preallocated
     - prealloc
     - wsl
     - maligned
     - gochecknoglobals
+    # Checks that errors returned from external packages are wrapped,
+    # can be fixed and removed later but will include a lot of work.
+    - wrapcheck
+    # linter that makes you use a separate _test package.
+    # Most of the tests in this repo are internal, disable this linter.
+    - testpackage
+    # I don't think we need blank line before each return statement.
+    # If you think otherwise feel free to remove this disable statement and fix the issues.
+    - nlreturn
+    # An analyzer to detect magic numbers. We have a lot of "magic numbers" here, used mainly
+    # for type sizes, etc.
+    - gomnd
+    # Golang linter to check the errors handling expressions. We return a lot of dynamic errors because
+    # we the errors will end up in the terminal telling user what went wrong. This linter doesn't make much
+    # sense for CLI tools.
+    - goerr113
+    # Linter for Go software that can be used to find code that will cause problems with the error wrapping scheme
+    # introduced in Go 1.13. Again, for the same reasons as goerr113, we don't need this linter for CLI tool.
+    - errorlint
+    # Checks if all struct fields are initialized. Unnecessarily restrictive.
+    - exhaustivestruct
+    # check exhaustiveness of enum switch statements. This linter would make the switch statements for individual
+    # types super long.
+    - exhaustive
+    # Used to forbid print statements. But we use those to generate code, so no use here.
+    - forbidigo
+    # Gci control golang package import order and make it always deterministic.
+    # Fails because we have comments for some imports.
+    - gci
 
 issues:
   exclude-rules:
-    - path: _test\.go
-      linters:
-        - goconst
-        - dupl
-        - funlen
     - path: tests/*
       linters:
         - deadcode
         - varcheck
         - unused
+        - gomnd
+        - dupl
 
 run:
   modules-download-mode: readonly

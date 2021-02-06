@@ -22,10 +22,12 @@ func (g *Generator) getDecoderName(t reflect.Type) string {
 // tags describe the field tags for the field being unmarshaled and indent specifies how much to indent the output.
 type decoderGen func(g *Generator, t reflect.Type, info, in, out string, tags fieldTags, indent int) error
 
-var stringType = reflect.TypeOf((*string)(nil)).Elem()
-var byteSliceType = reflect.TypeOf((*[]byte)(nil)).Elem()
-var bigIntType = reflect.TypeOf((*big.Int)(nil)).Elem()
-var infDecType = reflect.TypeOf((*inf.Dec)(nil)).Elem()
+var (
+	stringType    = reflect.TypeOf((*string)(nil)).Elem()
+	byteSliceType = reflect.TypeOf((*[]byte)(nil)).Elem()
+	bigIntType    = reflect.TypeOf((*big.Int)(nil)).Elem()
+	infDecType    = reflect.TypeOf((*inf.Dec)(nil)).Elem()
+)
 
 var decodersByKind = map[reflect.Kind]decoderMeta{
 	reflect.String: {
@@ -487,7 +489,7 @@ func (g *Generator) genTypeDecoder(t reflect.Type, info, in, out string, tags fi
 	return err
 }
 
-// sortTypes sorts types and puts preferred to the first index
+// sortTypes sorts types and puts preferred to the first index.
 func sortTypes(types []gocql.Type, preferred gocql.Type) {
 	if len(types) == 0 {
 		return

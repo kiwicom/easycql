@@ -349,15 +349,17 @@ type CQLListTypes struct {
 	NamedStringArrayPtr *NamedStringArray
 }
 
-type NamedBytes []byte
-type NamedStringSlice []string
-type NamedStringArray [5]string
-
-type CustomString string
+type (
+	NamedBytes       []byte
+	NamedStringSlice []string
+	NamedStringArray [5]string
+	CustomString     string
+)
 
 func (c CustomString) MarshalCQL(info gocql.TypeInfo) ([]byte, error) {
 	return []byte(strings.ToLower(string(c))), nil
 }
+
 func (c *CustomString) UnmarshalCQL(info gocql.TypeInfo, data []byte) error {
 	*c = CustomString(strings.ToUpper(string(data)))
 	return nil

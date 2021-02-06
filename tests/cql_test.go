@@ -188,9 +188,11 @@ func buildUDT(typ reflect.Type, fieldType gocql.TypeInfo, fieldData []byte, null
 }
 
 func TestUnmarshalVarchar(t *testing.T) {
+	t.Parallel()
 	for _, test := range varcharTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			typeInfo, data := buildUDT(reflect.TypeOf((*CQLVarcharTypes)(nil)).Elem(), test.FieldTypeInfo, test.Data,
 				false)
 			var value CQLVarcharTypes
@@ -202,9 +204,11 @@ func TestUnmarshalVarchar(t *testing.T) {
 }
 
 func TestMarshalVarchar(t *testing.T) {
+	t.Parallel()
 	for _, test := range varcharTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			var data []byte
 			typeInfo, expectedData := buildUDT(reflect.TypeOf((*CQLVarcharTypes)(nil)).Elem(), test.FieldTypeInfo,
 				test.Data, test.NullCheck)
@@ -2461,9 +2465,11 @@ var integerTests = []struct {
 }
 
 func TestUnmarshalInteger(t *testing.T) {
+	t.Parallel()
 	for _, test := range integerTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
@@ -2737,9 +2743,11 @@ func requireBigIntStructEqual(t *testing.T, expectedIface, actualIface interface
 }
 
 func TestUnmarshalBigInt(t *testing.T) {
+	t.Parallel()
 	for _, test := range bigIntTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
@@ -2887,9 +2895,11 @@ var booleanTests = []struct {
 }
 
 func TestUnmarshalBoolean(t *testing.T) {
+	t.Parallel()
 	for _, test := range booleanTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
@@ -3102,9 +3112,11 @@ func requireDecStructEqual(t *testing.T, expectedIface, actualIface interface{})
 }
 
 func TestUnmarshalDec(t *testing.T) {
+	t.Parallel()
 	for _, test := range decimalTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
@@ -3228,9 +3240,11 @@ var floatTests = []struct {
 }
 
 func TestUnmarshalFloat(t *testing.T) {
+	t.Parallel()
 	for _, test := range floatTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())
@@ -3354,9 +3368,11 @@ var doubleTests = []struct {
 }
 
 func TestUnmarshalDouble(t *testing.T) {
+	t.Parallel()
 	for _, test := range doubleTests {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
 			typeInfo, data := buildUDT(reflect.ValueOf(test.Value).Type(), test.FieldTypeInfo, test.Data, false)
 			value := reflect.New(reflect.TypeOf(test.Value))
 			err := gocql.Unmarshal(typeInfo, data, value.Interface())

@@ -42,7 +42,7 @@ var goModPathCache = struct {
 	paths: make(map[string]string),
 }
 
-// empty if no go.mod, GO111MODULE=off or go without go modules support
+// empty if no go.mod, GO111MODULE=off or go without go modules support.
 func goModPath(fname string, isDir bool) (string, error) {
 	root := fname
 	if !isDir {
