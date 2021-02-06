@@ -13,14 +13,13 @@ import (
 	"unicode"
 )
 
-// package paths to use in imports of the generate files.
 const (
+	// package paths to use in imports of the generate files.
 	pkgMarshal = "github.com/kiwicom/easycql/marshal"
 	pkgEasyCQL = "github.com/kiwicom/easycql"
 	pkgGoCQL   = "github.com/gocql/gocql"
 	pkgInf     = "gopkg.in/inf.v0"
-)
-const license = `
+	license    = `
 // ---------------------------------------------------------------------------------------------------------------------
 // OPEN SOURCE ATTRIBUTION
 // ---------------------------------------------------------------------------------------------------------------------
@@ -84,6 +83,7 @@ const license = `
 // ---------------------------------------------------------------------------------------------------------------------
 
 `
+)
 
 // FieldNamer defines a policy for generating names for struct fields.
 type FieldNamer interface {
@@ -299,7 +299,7 @@ func (g *Generator) getFieldName(t reflect.Type, f reflect.StructField, tags fie
 	return g.fieldNamer.GetCQLFieldName(t, f)
 }
 
-// fixes vendored paths
+// fixes vendored paths.
 func fixPkgPathVendoring(pkgPath string) string {
 	const vendor = "/vendor/"
 	if i := strings.LastIndex(pkgPath, vendor); i != -1 {
@@ -362,36 +362,36 @@ func (g *Generator) getType(t reflect.Type) string {
 	}
 
 	if t.Name() == "" || t.PkgPath() == "" {
-		if t.Kind() == reflect.Struct {
-			// the fields of an anonymous struct can have named types,
-			// and t.String() will not be sufficient because it does not
-			// remove the package name when it matches g.pkgPath.
-			// so we convert by hand
-			nf := t.NumField()
-			lines := make([]string, 0, nf)
-			for i := 0; i < nf; i++ {
-				f := t.Field(i)
-				var line string
-				if !f.Anonymous {
-					line = f.Name + " "
-				} // else the field is anonymous (an embedded type)
-				line += g.getType(f.Type)
-				t := f.Tag
-				if t != "" {
-					line += " " + escapeTag(t)
-				}
-				lines = append(lines, line)
-			}
-			return strings.Join([]string{"struct { ", strings.Join(lines, "; "), " }"}, "")
+		if t.Kind() != reflect.Struct {
+			return t.String()
 		}
-		return t.String()
+		// the fields of an anonymous struct can have named types,
+		// and t.String() will not be sufficient because it does not
+		// remove the package name when it matches g.pkgPath.
+		// so we convert by hand
+		nf := t.NumField()
+		lines := make([]string, 0, nf)
+		for i := 0; i < nf; i++ {
+			f := t.Field(i)
+			var line string
+			if !f.Anonymous {
+				line = f.Name + " "
+			} // else the field is anonymous (an embedded type)
+			line += g.getType(f.Type)
+			t := f.Tag
+			if t != "" {
+				line += " " + escapeTag(t)
+			}
+			lines = append(lines, line)
+		}
+		return strings.Join([]string{"struct { ", strings.Join(lines, "; "), " }"}, "")
 	} else if t.PkgPath() == g.pkgPath {
 		return t.Name()
 	}
 	return g.pkgAlias(t.PkgPath()) + "." + t.Name()
 }
 
-// escape a struct field tag string back to source code
+// escape a struct field tag string back to source code.
 func escapeTag(tag reflect.StructTag) string {
 	t := string(tag)
 	if strings.ContainsRune(t, '`') {
@@ -475,7 +475,7 @@ func (DefaultFieldNamer) GetCQLFieldName(t reflect.Type, f reflect.StructField) 
 	return f.Name
 }
 
-// LowerCamelCaseFieldNamer
+// LowerCamelCaseFieldNamer generates lower camel case field names.
 type LowerCamelCaseFieldNamer struct{}
 
 func isLower(b byte) bool {
@@ -486,7 +486,7 @@ func isUpper(b byte) bool {
 	return b >= 65 && b <= 90
 }
 
-// convert HTTPRestClient to httpRestClient
+// convert HTTPRestClient to httpRestClient.
 func lowerFirst(s string) string {
 	if s == "" {
 		return ""

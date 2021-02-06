@@ -10,8 +10,10 @@ import (
 	"github.com/kiwicom/easycql/marshal"
 )
 
-var benchmarkUnmarshalOut BenchmarkStruct
-var benchmarkMarshalOut []byte
+var (
+	benchmarkUnmarshalOut BenchmarkStruct
+	benchmarkMarshalOut   []byte
+)
 
 var benchTypeInfo = gocql.UDTTypeInfo{
 	NativeType: gocql.NewNativeType(3, gocql.TypeUDT, ""),

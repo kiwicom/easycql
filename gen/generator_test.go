@@ -8,6 +8,7 @@ import (
 )
 
 func TestCamelToSnake(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		In, Out string
 	}{
@@ -32,6 +33,7 @@ func TestCamelToSnake(t *testing.T) {
 }
 
 func TestCamelToLowerCamel(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		In, Out string
 	}{
@@ -54,6 +56,7 @@ func TestCamelToLowerCamel(t *testing.T) {
 }
 
 func TestJoinFunctionNameParts(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		keepFirst bool
 		parts     []string
@@ -74,6 +77,7 @@ func TestJoinFunctionNameParts(t *testing.T) {
 }
 
 func TestFixVendorPath(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		In, Out string
 	}{
@@ -96,6 +100,7 @@ type TestTagsStruct struct {
 }
 
 func TestUseCQLTag(t *testing.T) {
+	t.Parallel()
 	g := NewGenerator("test")
 	g.UseSnakeCase()
 	typ := reflect.TypeOf((*TestTagsStruct)(nil)).Elem()

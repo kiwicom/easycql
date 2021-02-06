@@ -9,14 +9,15 @@ import (
 	"strings"
 
 	"github.com/kiwicom/easycql/bootstrap"
+	"github.com/kiwicom/easycql/parser"
+
 	// Reference the gen package to be friendly to vendoring tools,
 	// as it is an indirect dependency.
 	// (The temporary bootstrapping code uses it.)
 	_ "github.com/kiwicom/easycql/gen"
-	"github.com/kiwicom/easycql/parser"
 )
 
-// available cli parameters
+// All available cli parameters.
 var (
 	buildTags             = flag.String("build_tags", "", "build tags to add to generated file")
 	snakeCase             = flag.Bool("snake_case", false, "use snake_case names instead of CamelCase by default")

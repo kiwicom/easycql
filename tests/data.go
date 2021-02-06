@@ -238,8 +238,10 @@ type unexportedStruct struct {
 	Value string
 }
 
-var unexportedStructValue = unexportedStruct{"test"}
-var unexportedStructString = `{"Value":"test"}`
+var (
+	unexportedStructValue  = unexportedStruct{"test"}
+	unexportedStructString = `{"Value":"test"}`
+)
 
 type ExcludedField struct {
 	Process       bool `json:"process"`
@@ -310,8 +312,10 @@ var mapsValue = Maps{
 	CustomMap: map[Str]Str{"c": "d"},
 }
 
-type NamedSlice []Str
-type NamedMap map[Str]Str
+type (
+	NamedSlice []Str
+	NamedMap   map[Str]Str
+)
 
 type DeepNest struct {
 	SliceMap         map[Str][]Str

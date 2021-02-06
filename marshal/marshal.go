@@ -10,10 +10,7 @@ import (
 )
 
 var (
-	bigOne = big.NewInt(1)
-)
-
-var (
+	bigOne              = big.NewInt(1)
 	ErrorUDTUnavailable = errors.New("UDT are not available on protocols less than 3, please update config")
 )
 
