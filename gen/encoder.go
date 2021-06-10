@@ -192,7 +192,7 @@ func (g *Generator) genStructEncoder(t reflect.Type) error {
 		fmt.Fprintf(g.out, "      return fmt.Errorf(\"unknown field: %%s\", udtElement.Name)")
 	} else {
 		fmt.Fprintln(g.out, "    default:")
-		fmt.Fprintln(g.out, "      marshal.AppendBytes(buf, nil)")
+		fmt.Fprintln(g.out, "      buf = marshal.AppendBytes(buf, nil)")
 	}
 	fmt.Fprintln(g.out, "    }")
 	fmt.Fprintln(g.out, "  }")

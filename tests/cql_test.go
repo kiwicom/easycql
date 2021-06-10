@@ -3385,3 +3385,42 @@ func TestUnmarshalDouble(t *testing.T) {
 		})
 	}
 }
+
+func TestMarshalOmittedField(t *testing.T) {
+	t.Parallel()
+
+	typeInfo := gocql.UDTTypeInfo{
+		NativeType: gocql.NewNativeType(3, gocql.TypeUDT, ""),
+		KeySpace:   "myKeyspace",
+		Name:       "CQLVarcharTypesUDT",
+		Elements: []gocql.UDTField{
+			{
+				Name: "Omitted",
+				Type: gocql.NewNativeType(2, gocql.TypeSmallInt, ""),
+			},
+			{
+				Name: "Int16",
+				Type: gocql.NewNativeType(2, gocql.TypeSmallInt, ""),
+			},
+		},
+	}
+	expectedData := []byte{0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x02, 0x00, 0x2a}
+	value := SingleInt16{
+		Int16: 42,
+	}
+
+	t.Run("marshal", func(t *testing.T) {
+		t.Parallel()
+		data, err := gocql.Marshal(typeInfo, value)
+		require.NoError(t, err)
+		require.Equal(t, expectedData, data)
+	})
+
+	t.Run("unmarshal", func(t *testing.T) {
+		t.Parallel()
+		var unmarshaled SingleInt16
+		err := gocql.Unmarshal(typeInfo, expectedData, &unmarshaled)
+		require.NoError(t, err)
+		require.Equal(t, value, unmarshaled)
+	})
+}
