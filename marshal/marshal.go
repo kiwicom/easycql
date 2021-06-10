@@ -6,6 +6,7 @@ package marshal
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 )
 
@@ -82,13 +83,31 @@ func DecBigInt2C(data []byte, n *big.Int) {
 	}
 }
 
-func ReadBytes(p []byte) ([]byte, []byte) {
+// ReadBytes decodes bytes from p and returns rest of p.
+// It swallows whole p if there is not enough bytes for the data.
+// https://github.com/apache/cassandra/blob/698078fecf3914b2a5f9d2ea344868f677f5afb2/doc/native_protocol_v4.spec#L227-L228
+// Deprecated: Use ReadBytes2 instead.
+func ReadBytes(p []byte) (bytes, rest []byte) {
+	bytes, rest, err := ReadBytes2(p)
+	if err != nil {
+		return p, nil
+	}
+	return bytes, rest
+}
+
+// ReadBytes2 decodes bytes from p and returns rest of p.
+// It returns an error if there is not enough bytes to read the data.
+// https://github.com/apache/cassandra/blob/698078fecf3914b2a5f9d2ea344868f677f5afb2/doc/native_protocol_v4.spec#L227-L228
+func ReadBytes2(p []byte) (bytes, rest []byte, err error) {
 	size := readInt(p)
 	p = p[4:]
 	if size < 0 {
-		return nil, p
+		return nil, p, nil
 	}
-	return p[:size], p[size:]
+	if len(p) < int(size) {
+		return nil, nil, fmt.Errorf("read bytes: expecting %d bytes, got %d", size, len(p))
+	}
+	return p[:size], p[size:], nil
 }
 
 func readInt(p []byte) int32 {

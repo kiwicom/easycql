@@ -793,8 +793,11 @@ func (g *Generator) genStructDecoder(t reflect.Type) error {
 	fmt.Fprintln(g.out, "      return nil")
 	fmt.Fprintln(g.out, "    }")
 	fmt.Fprintln(g.out, "    var elementData []byte")
-	fmt.Fprintln(g.out, "    elementData, data = marshal.ReadBytes(data)")
-
+	fmt.Fprintln(g.out, "    var readBytesErr error")
+	fmt.Fprintln(g.out, "    elementData, data, readBytesErr = marshal.ReadBytes2(data)")
+	fmt.Fprintln(g.out, "    if readBytesErr != nil {")
+	fmt.Fprintf(g.out, "      return fmt.Errorf(\"%%s.%%s UDT unmarshal: %%v\", udt.Name, udtElement.Name, readBytesErr)\n")
+	fmt.Fprintln(g.out, "    }")
 	fmt.Fprintln(g.out, "    switch udtElement.Name {")
 	for _, f := range fs {
 		if err := g.genStructFieldDecoder(t, f); err != nil {
