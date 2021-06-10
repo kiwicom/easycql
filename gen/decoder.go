@@ -567,7 +567,8 @@ func (g *Generator) genTypeDecoderNoCheck(t reflect.Type, info, in, out string, 
 		return g.genCQLTypeSwitch(t, info, in, out, tags, indent, decoderMeta)
 	}
 
-	if t.Kind() == reflect.Ptr {
+	switch t.Kind() {
+	case reflect.Ptr:
 		fmt.Fprintln(g.out, ws+"if "+in+" == nil {")
 		fmt.Fprintln(g.out, ws+"  "+out+" = nil")
 		fmt.Fprintln(g.out, ws+"} else {")
@@ -575,6 +576,15 @@ func (g *Generator) genTypeDecoderNoCheck(t reflect.Type, info, in, out string, 
 		if err := g.genTypeDecoder(t.Elem(), info, in, "*"+out, tags, indent+1); err != nil {
 			return err
 		}
+		fmt.Fprintln(g.out, ws+"}")
+		return nil
+	case reflect.Array, reflect.Slice:
+		g.addType(t)
+		decoderFun := g.getDecoderName(t)
+		decoderErr := g.uniqueVarName()
+		fmt.Fprintln(g.out, ws+"if "+decoderErr+" := "+decoderFun+"("+info+", "+in+", "+reference(out)+"); "+
+			decoderErr+" != nil {")
+		fmt.Fprintln(g.out, ws+"  return "+decoderErr)
 		fmt.Fprintln(g.out, ws+"}")
 		return nil
 	}
@@ -731,19 +741,49 @@ func (g *Generator) genDecoder(t reflect.Type) error {
 
 func (g *Generator) genSliceArrayDecoder(t reflect.Type) error {
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Map:
+	case reflect.Slice, reflect.Array:
 	default:
-		return fmt.Errorf("cannot generate encoder/decoder for %v, not a slice/array/map type", t)
+		return fmt.Errorf("cannot generate decoder for %v, not a slice/array type", t)
 	}
 
 	fname := g.getDecoderName(t)
 	typ := g.getType(t)
 
+	elementType := t.Elem()
+
 	fmt.Fprintln(g.out, "func "+fname+"(info gocql.TypeInfo, data []byte, out *"+typ+") error {")
-	err := g.genTypeDecoderNoCheck(t, "info", "data", "*out", fieldTags{}, 1)
+	fmt.Fprintln(g.out, "  listInfo, ok := info.(gocql.CollectionType)")
+	fmt.Fprintln(g.out, "  if !ok || !(info.Type() == gocql.TypeList || info.Type() == gocql.TypeSet) {")
+	fmt.Fprintln(g.out, "    return gocql.Unmarshal(info, data, out)")
+	fmt.Fprintln(g.out, "  }")
+	fmt.Fprintln(g.out, "  itemCount, read, err := marshal.ReadCollectionSize(listInfo, data)")
+	fmt.Fprintln(g.out, "  if err != nil {")
+	fmt.Fprintln(g.out, "    return err")
+	fmt.Fprintln(g.out, "  }")
+	fmt.Fprintln(g.out, "  data = data[read:]")
+	if t.Kind() == reflect.Array {
+		fmt.Fprintf(g.out, "  if itemCount != %d {\n", t.Len())
+		fmt.Fprintf(g.out, "    return fmt.Errorf(\"collection length %%d does not match Go array length %d\", itemCount)\n",
+			t.Len())
+		fmt.Fprintln(g.out, "  }")
+	} else {
+		fmt.Fprintf(g.out, "  *out = make(%s, itemCount)\n", typ)
+	}
+	fmt.Fprintln(g.out, "  for i := 0; i < itemCount; i++ {")
+	fmt.Fprintln(g.out, "    itemBytes, read, err := marshal.ReadCollectionSize(listInfo, data)")
+	fmt.Fprintln(g.out, "    if err != nil {")
+	fmt.Fprintf(g.out, "      return fmt.Errorf(\"element %%d: %%v\", i, err)\n")
+	fmt.Fprintln(g.out, "    }")
+	fmt.Fprintln(g.out, "    data = data[read:]")
+	fmt.Fprintln(g.out, "    if len(data) < itemBytes {")
+	fmt.Fprintf(g.out, "      return fmt.Errorf(\"unmarshal list: element %%d: unexpected eof\", i)\n")
+	fmt.Fprintln(g.out, "    }")
+	err := g.genTypeDecoder(elementType, "listInfo.Elem", "data[:itemBytes]", "(*out)[i]", fieldTags{}, 3)
 	if err != nil {
 		return err
 	}
+	fmt.Fprintln(g.out, "    data = data[itemBytes:]")
+	fmt.Fprintln(g.out, "  }")
 	fmt.Fprintln(g.out, "  return nil")
 	fmt.Fprintln(g.out, "}")
 

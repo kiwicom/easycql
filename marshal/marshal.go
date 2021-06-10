@@ -8,11 +8,17 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+
+	"github.com/gocql/gocql"
 )
 
 var (
 	bigOne              = big.NewInt(1)
 	ErrorUDTUnavailable = errors.New("UDT are not available on protocols less than 3, please update config")
+)
+
+const (
+	protoVersion2 = 0x02
 )
 
 func DecInt(x []byte) int32 {
@@ -112,4 +118,21 @@ func ReadBytes2(p []byte) (bytes, rest []byte, err error) {
 
 func readInt(p []byte) int32 {
 	return int32(p[0])<<24 | int32(p[1])<<16 | int32(p[2])<<8 | int32(p[3])
+}
+
+func ReadCollectionSize(info gocql.CollectionType, data []byte) (size, read int, err error) {
+	if info.Version() > protoVersion2 {
+		if len(data) < 4 {
+			return 0, 0, fmt.Errorf("read collection size: unexpected eof")
+		}
+		size = int(data[0])<<24 | int(data[1])<<16 | int(data[2])<<8 | int(data[3])
+		read = 4
+	} else {
+		if len(data) < 2 {
+			return 0, 0, fmt.Errorf("read collection size: unexpected eof")
+		}
+		size = int(data[0])<<8 | int(data[1])
+		read = 2
+	}
+	return
 }
