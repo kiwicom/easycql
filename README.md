@@ -142,47 +142,43 @@ When unmarshaling, conservative mode is roughly 4 times faster than using plain 
 is roughly 2 times faster than conservative mode according to our benchmark:
 
 ```
----- plain gocql ----
-goos: linux
-goarch: amd64
-pkg: github.com/kiwicom/easycql/tests
-BenchmarkUnmarshal-8      191496              6343 ns/op
-BenchmarkMarshal-8        202076              5839 ns/op
-PASS
-ok      github.com/kiwicom/easycql/tests        3.517s
-
----- easycql conservative ----
-goos: linux
-goarch: amd64
-pkg: github.com/kiwicom/easycql/tests
-BenchmarkUnmarshal-8      809300              1474 ns/op
-BenchmarkMarshal-8        413431              2702 ns/op
-PASS
-ok      github.com/kiwicom/easycql/tests        3.303s
-
----- easycql optimized ----
-goos: linux
-goarch: amd64
-pkg: github.com/kiwicom/easycql/tests
-BenchmarkUnmarshal-8     1915501               616 ns/op
-BenchmarkMarshal-8        419199              2741 ns/op
-PASS
-ok      github.com/kiwicom/easycql/tests        3.006s
-
----- comparison ----
-
 plain gocql vs easycql conservative:
-benchmark                old ns/op     new ns/op     delta
-BenchmarkUnmarshal-8     6343          1474          -76.76%
-BenchmarkMarshal-8       5839          2702          -53.72%
+name          old time/op    new time/op    delta
+Unmarshal-12    8.78µs ±14%    1.26µs ± 0%  -85.67%  (p=0.008 n=5+5)
+Marshal-12      6.07µs ± 1%    3.21µs ± 9%  -47.18%  (p=0.008 n=5+5)
+
+name          old alloc/op   new alloc/op   delta
+Unmarshal-12    3.26kB ± 0%    0.11kB ± 0%  -96.57%  (p=0.008 n=5+5)
+Marshal-12      1.56kB ± 0%    1.18kB ± 0%  -24.62%  (p=0.008 n=5+5)
+
+name          old allocs/op  new allocs/op  delta
+Unmarshal-12      61.0 ± 0%       2.0 ± 0%  -96.72%  (p=0.008 n=5+5)
+Marshal-12        94.0 ± 0%      55.0 ± 0%  -41.49%  (p=0.008 n=5+5)
 
 plain gocql vs easycql optimized:
-benchmark                old ns/op     new ns/op     delta
-BenchmarkUnmarshal-8     6343          616           -90.29%
-BenchmarkMarshal-8       5839          2741          -53.06%
+name          old time/op    new time/op    delta
+Unmarshal-12    8.78µs ±14%    0.49µs ± 1%  -94.40%  (p=0.008 n=5+5)
+Marshal-12      6.07µs ± 1%    3.03µs ±15%  -50.18%  (p=0.008 n=5+5)
+
+name          old alloc/op   new alloc/op   delta
+Unmarshal-12    3.26kB ± 0%    0.11kB ± 0%  -96.57%  (p=0.008 n=5+5)
+Marshal-12      1.56kB ± 0%    1.18kB ± 0%  -24.62%  (p=0.008 n=5+5)
+
+name          old allocs/op  new allocs/op  delta
+Unmarshal-12      61.0 ± 0%       2.0 ± 0%  -96.72%  (p=0.008 n=5+5)
+Marshal-12        94.0 ± 0%      55.0 ± 0%  -41.49%  (p=0.008 n=5+5)
 
 easycql conservative vs easycql optimized:
-benchmark                old ns/op     new ns/op     delta
-BenchmarkUnmarshal-8     1474          616           -58.21%
-BenchmarkMarshal-8       2702          2741          +1.44%
+name          old time/op    new time/op    delta
+Unmarshal-12    1.26µs ± 0%    0.49µs ± 1%  -60.90%  (p=0.008 n=5+5)
+Marshal-12      3.21µs ± 9%    3.03µs ±15%     ~     (p=0.151 n=5+5)
+
+name          old alloc/op   new alloc/op   delta
+Unmarshal-12      112B ± 0%      112B ± 0%     ~     (all equal)
+Marshal-12      1.18kB ± 0%    1.18kB ± 0%     ~     (all equal)
+
+name          old allocs/op  new allocs/op  delta
+Unmarshal-12      2.00 ± 0%      2.00 ± 0%     ~     (all equal)
+Marshal-12        55.0 ± 0%      55.0 ± 0%     ~     (all equal)
+
 ```

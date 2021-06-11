@@ -1,41 +1,47 @@
 #!/bin/sh
 # Run benchmarks with different setups
 
-# Plain gocql
-rm -f ./tests/benchmark_easycql.go
-echo "---- plain gocql ----"
-go test "-bench=.*" ./tests | tee bench-gocql.txt
+rm bench-gocql.txt bench-conservative.txt bench-optimized.txt
 
-# easycql conservative mode
-echo
-echo "---- easycql conservative ----"
-bin/easycql -conservative -all ./tests/benchmark.go
-go test "-bench=.*" ./tests | tee bench-conservative.txt
+for i in {1..5};
+do
 
-# easycql optimized mode
-echo
-echo "---- easycql optimized ----"
-bin/easycql -all ./tests/benchmark.go
-go test "-bench=.*" ./tests | tee bench-optimized.txt
+	# Plain gocql
+	rm -f ./tests/benchmark_easycql.go
+	echo "---- plain gocql ----"
+	go test "-bench=.*" ./tests -benchmem | tee -a bench-gocql.txt
+
+	# easycql conservative mode
+	echo
+	echo "---- easycql conservative ----"
+	bin/easycql -conservative -all ./tests/benchmark.go
+	go test "-bench=.*" ./tests -benchmem | tee -a bench-conservative.txt
+
+	# easycql optimized mode
+	echo
+	echo "---- easycql optimized ----"
+	bin/easycql -all ./tests/benchmark.go
+	go test "-bench=.*" ./tests -benchmem | tee -a bench-optimized.txt
+done
 
 # Compare results
 echo
 echo "---- comparison ----"
 echo
 
-if ! command -v benchcmp >/dev/null
+if ! command -v benchstat >/dev/null
 then
-  echo "benchcmp not installed, please run"
-  echo "  GO111MODULE=off go get -u golang.org/x/tools/cmd/benchcmp"
+  echo "benchstat not installed, please run"
+  echo "  go install golang.org/x/perf/cmd/benchstat"
   echo "to display benchmark comparison here"
   exit 1
 fi
 
 echo plain gocql vs easycql conservative:
-benchcmp bench-gocql.txt bench-conservative.txt
+benchstat bench-gocql.txt bench-conservative.txt
 echo
 echo plain gocql vs easycql optimized:
-benchcmp bench-gocql.txt bench-optimized.txt
+benchstat bench-gocql.txt bench-optimized.txt
 echo
 echo easycql conservative vs easycql optimized:
-benchcmp bench-conservative.txt bench-optimized.txt
+benchstat bench-conservative.txt bench-optimized.txt
