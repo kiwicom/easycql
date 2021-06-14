@@ -462,9 +462,10 @@ func (g *Generator) functionName(prefix string, t reflect.Type) string {
 	}
 }
 
-// DefaultFieldsNamer implements trivial naming policy equivalent to encoding/json.
+// DefaultFieldNamer implements trivial naming policy equivalent to encoding/json.
 type DefaultFieldNamer struct{}
 
+// GetCQLFieldName returns the name of the field in CQL based on Go struct field.
 //nolint:gocritic // parameter f is huge
 func (DefaultFieldNamer) GetCQLFieldName(t reflect.Type, f reflect.StructField) string {
 	cqlName := strings.Split(f.Tag.Get("easycql"), ",")[0]
@@ -532,6 +533,7 @@ func lowerFirst(s string) string {
 	return str
 }
 
+// GetCQLFieldName returns lowercase name of the field in CQL based on Go struct field.
 //nolint:gocritic // parameter f is huge
 func (LowerCamelCaseFieldNamer) GetCQLFieldName(t reflect.Type, f reflect.StructField) string {
 	cqlName := strings.Split(f.Tag.Get("easycql"), ",")[0]
@@ -590,6 +592,7 @@ func camelToSnake(name string) string {
 	return ret.String()
 }
 
+// GetCQLFieldName returns snake_case name of the field in CQL based on Go struct field.
 //nolint:gocritic // parameter f is huge
 func (SnakeCaseFieldNamer) GetCQLFieldName(t reflect.Type, f reflect.StructField) string {
 	cqlName := strings.Split(f.Tag.Get("easycql"), ",")[0]

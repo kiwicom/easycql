@@ -35,6 +35,10 @@ linters-settings:
     statements: 60
   errcheck:
     ignorepkg: fmt
+  tagliatelle:
+    case:
+      rules:
+        json: snake
 
 linters:
   enable-all: true
@@ -73,6 +77,15 @@ linters:
     # Gci control golang package import order and make it always deterministic.
     # Fails because we have comments for some imports.
     - gci
+    # interfacer is not very useful and was obsoleted by its author.
+    - interfacer
+    # scopelint is deprecated in favor of explortloopref
+    - scopelint
+    # golint is deprecated (with not suggested alternative)
+    - golint
+    # we use gocyclo instead of cyclop.
+    - cyclop
+
 
 issues:
   exclude-rules:
@@ -83,6 +96,10 @@ issues:
         - unused
         - gomnd
         - dupl
+    - path: tests/data.go
+      linters:
+        - revive
+      text: "exported:"
 
 run:
   modules-download-mode: readonly
