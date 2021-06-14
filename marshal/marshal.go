@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	bigOne              = big.NewInt(1)
+	bigOne = big.NewInt(1)
+	// ErrorUDTUnavailable is returned when easycql is used on protocol older than version 3.
 	ErrorUDTUnavailable = errors.New("UDT are not available on protocols less than 3, please update config")
 )
 
