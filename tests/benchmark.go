@@ -39,3 +39,8 @@ type BenchmarkStruct struct {
 	NamedFloat32 NamedFloat32
 	NamedDouble  NamedFloat64
 }
+
+type BenchmarkCollectionsStruct struct {
+	Int16Slice []int16
+	Int16Array [10]int16
+}

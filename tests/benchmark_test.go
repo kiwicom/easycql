@@ -11,8 +11,10 @@ import (
 )
 
 var (
-	benchmarkUnmarshalOut BenchmarkStruct
-	benchmarkMarshalOut   []byte
+	benchmarkUnmarshalOut            BenchmarkStruct
+	benchmarkUnmarshalCollectionsOut BenchmarkCollectionsStruct
+	benchmarkMarshalOut              []byte
+	benchmarkMarshalCollectionsOut   []byte
 )
 
 var benchTypeInfo = gocql.UDTTypeInfo{
@@ -188,6 +190,73 @@ func BenchmarkUnmarshal(b *testing.B) {
 	}
 }
 
+var collectionsTypeInfo = gocql.UDTTypeInfo{
+	NativeType: gocql.NewNativeType(4, gocql.TypeUDT, ""),
+	KeySpace:   "ks",
+	Name:       "MyUDT",
+	Elements: []gocql.UDTField{
+		{
+			Name: "Int16Slice",
+			Type: gocql.CollectionType{
+				NativeType: gocql.NewNativeType(4, gocql.TypeList, ""),
+				Elem:       gocql.NewNativeType(4, gocql.TypeSmallInt, ""),
+			},
+		},
+		{
+			Name: "Int16Array",
+			Type: gocql.CollectionType{
+				NativeType: gocql.NewNativeType(4, gocql.TypeList, ""),
+				Elem:       gocql.NewNativeType(4, gocql.TypeSmallInt, ""),
+			},
+		},
+	},
+}
+
+func BenchmarkUnmarshalCollections(b *testing.B) {
+	fieldValues := [][]byte{
+		{ // Int16List
+			0x00, 0x00, 0x00, 0x0a, // item count
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x02,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x03,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x04,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x05,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x06,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x07,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x08,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x09,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x0a,
+		},
+		{ // Int16Array
+			0x00, 0x00, 0x00, 0x0a, // item count
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x02,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x03,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x04,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x05,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x06,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x07,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x08,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x09,
+			0x00, 0x00, 0x00, 0x02, 0x00, 0x0a,
+		},
+	}
+
+	var data []byte
+	for fieldIdx := range fieldValues {
+		data = marshal.AppendBytes(data, fieldValues[fieldIdx])
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		err := gocql.Unmarshal(collectionsTypeInfo, data, &benchmarkUnmarshalCollectionsOut)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 func BenchmarkMarshal(b *testing.B) {
 	s := BenchmarkStruct{
 		Int:          0x12345678,
@@ -230,5 +299,22 @@ func BenchmarkMarshal(b *testing.B) {
 			b.Fatal(err)
 		}
 		benchmarkMarshalOut = data
+	}
+}
+
+func BenchmarkMarshalCollections(b *testing.B) {
+	s := BenchmarkCollectionsStruct{
+		Int16Slice: []int16{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		Int16Array: [10]int16{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		data, err := gocql.Marshal(collectionsTypeInfo, s)
+		if err != nil {
+			b.Fatal(err)
+		}
+		benchmarkMarshalCollectionsOut = data
 	}
 }
